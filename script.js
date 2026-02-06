@@ -1,4 +1,4 @@
-// Load data or start fresh
+
 let data = JSON.parse(localStorage.getItem("data")) || {};
 
 function saveData() {
@@ -104,3 +104,4 @@ function updateUI() {
 
 // Start the UI
 updateUI();
+
