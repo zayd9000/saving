@@ -7,7 +7,7 @@ function saveData() {
 function addPerson() {
   const nameInput = document.getElementById("personName");
   const name = nameInput.value.trim();
-  if (!name || data[name]) return alert("Invalid name or person exists");
+  if (!name || data[name]) return alert("Name error");
   data[name] = { USD: 0, IQD: 0, transactions: [] };
   nameInput.value = "";
   saveData();
@@ -18,10 +18,9 @@ function addTransaction() {
   const person = document.getElementById("personSelect").value;
   const amount = Number(document.getElementById("amount").value);
   const currency = document.getElementById("currency").value;
-  const note = document.getElementById("note").value;
   if (!person || !amount) return alert("Missing info");
   data[person][currency] += amount;
-  data[person].transactions.push({ amount, currency, note, date: new Date().toLocaleDateString() });
+  data[person].transactions.push({ amount: amount, currency: currency });
   saveData();
   updateUI();
 }
@@ -37,16 +36,17 @@ function updateUI() {
     opt.textContent = name;
     select.appendChild(opt);
     const div = document.createElement("div");
-    div.style.border = "1px solid #ccc";
-    div.style.margin = "10px 0";
+    div.style.background = "white";
     div.style.padding = "10px";
+    div.style.marginTop = "10px";
+    div.style.borderRadius = "8px";
     div.innerHTML = "<strong>" + name + "</strong><br>USD: " + data[name].USD + "<br>IQD: " + data[name].IQD;
     accounts.appendChild(div);
   }
 }
 
 function clearAllData() {
-  if(confirm("Delete all?")) { data = {}; saveData(); updateUI(); }
+  if(confirm("Clear?")) { data = {}; saveData(); updateUI(); }
 }
 
 updateUI();
