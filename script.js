@@ -84,15 +84,15 @@ function updateUI() {
       <div class="account-header">
         <strong>${name}</strong>
         <button onclick="deletePerson('${name}')" style="background:none; color:red; font-size:12px; border:none; cursor:pointer;">Delete</button>
-      </div>
+      
       <div class="balance-row">
         <span>USD:</span> 
         <span class="${data[name].USD >= 0 ? 'positive' : 'negative'}">$${data[name].USD.toLocaleString()}</span>
-      </div>
+      
       <div class="balance-row">
         <span>IQD:</span> 
         <span class="${data[name].IQD >= 0 ? 'positive' : 'negative'}">${data[name].IQD.toLocaleString()} IQD</span>
-      </div>
+      
       <ul class="history-list">
         ${data[name].transactions.slice(-3).reverse().map(t => 
           <li>${t.amount > 0 ? '+' : ''}${t.amount.toLocaleString()} ${t.currency} - ${t.note || 'No note'}</li>
@@ -105,3 +105,4 @@ function updateUI() {
 }
 
 updateUI();
+
