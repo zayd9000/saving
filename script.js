@@ -1,3 +1,4 @@
+// Load data or start fresh
 let data = JSON.parse(localStorage.getItem("data")) || {};
 
 function saveData() {
@@ -5,9 +6,11 @@ function saveData() {
 }
 
 function addPerson() {
-  const name = document.getElementById("personName").value.trim();
-  if (!name) return alert("Enter a name!");
-  if (data[name]) return alert("Person already exists!");
+  const nameInput = document.getElementById("personName");
+  const name = nameInput.value.trim();
+  
+  if (!name) return alert("Please enter a name");
+  if (data[name]) return alert("This person already exists");
 
   data[name] = {
     USD: 0,
@@ -15,7 +18,7 @@ function addPerson() {
     transactions: []
   };
 
-  document.getElementById("personName").value = "";
+  nameInput.value = "";
   saveData();
   updateUI();
 }
@@ -26,60 +29,78 @@ function addTransaction() {
   const currency = document.getElementById("currency").value;
   const note = document.getElementById("note").value;
 
-  if (!person) return alert("Select a person!");
-  if (isNaN(amount) || amount === 0) return alert("Enter a valid amount!");
+  if (!person) return alert("Select a person first");
+  if (!amount || isNaN(amount)) return alert("Enter a valid amount");
 
   data[person][currency] += amount;
   data[person].transactions.push({
     amount,
     currency,
     note,
-    date: new Date().toLocaleString()
+    date: new Date().toLocaleDateString()
   });
 
   document.getElementById("amount").value = "";
   document.getElementById("note").value = "";
-
   saveData();
   updateUI();
+}
+
+function deletePerson(name) {
+    if(confirm(`Are you sure you want to delete ${name}?`)) {
+        delete data[name];
+        saveData();
+        updateUI();
+    }
+}
+
+function clearAllData() {
+    if(confirm("Erase EVERYTHING? This cannot be undone.")) {
+        data = {};
+        saveData();
+        updateUI();
+    }
 }
 
 function updateUI() {
   const select = document.getElementById("personSelect");
   const accounts = document.getElementById("accounts");
-
-  // Save current selection to restore it after refresh
-  const currentSelection = select.value;
-
-  select.innerHTML = '<option value="" disabled selected>Choose Person</option>';
+  
+  select.innerHTML = '<option value="" disabled selected>Select Person</option>';
   accounts.innerHTML = "";
 
   for (let name in data) {
-    // Add name to dropdown
+    // Dropdown
     const option = document.createElement("option");
     option.value = name;
     option.textContent = name;
     select.appendChild(option);
 
-    // Add account card
+    // Account Card
     const div = document.createElement("div");
-    div.className = "box"; // Uses your existing CSS box style
+    div.className = "account-card";
     div.innerHTML = `
-      <h3>👤 ${name}</h3>
-      <p><strong>USD:</strong> $${data[name].USD.toLocaleString()}</p>
-      <p><strong>IQD:</strong> ${data[name].IQD.toLocaleString()} IQD</p>
-      <hr>
-      <small>History:</small>
-      <ul style="font-size: 0.8em; color: #555;">
-        ${data[name].transactions.slice(-5).reverse().map(t => 
-          <li>${t.amount > 0 ? '+' : ''}${t.amount} ${t.currency} — ${t.note || "No note"}</li>
+      <div class="account-header">
+        <strong>${name}</strong>
+        <button onclick="deletePerson('${name}')" style="background:none; color:red; font-size:12px; border:none; cursor:pointer;">Delete</button>
+      </div>
+      <div class="balance-row">
+        <span>USD:</span> 
+        <span class="${data[name].USD >= 0 ? 'positive' : 'negative'}">$${data[name].USD.toLocaleString()}</span>
+      </div>
+      <div class="balance-row">
+        <span>IQD:</span> 
+        <span class="${data[name].IQD >= 0 ? 'positive' : 'negative'}">${data[name].IQD.toLocaleString()} IQD</span>
+      </div>
+      <ul class="history-list">
+        ${data[name].transactions.slice(-3).reverse().map(t => 
+          <li>${t.amount > 0 ? '+' : ''}${t.amount.toLocaleString()} ${t.currency} - ${t.note || 'No note'}</li>
         ).join("")}
       </ul>
     `;
     accounts.appendChild(div);
   }
-  select.value = currentSelection;
 }
 
-// Run this when the page first loads
+// Start the UI
 updateUI();
