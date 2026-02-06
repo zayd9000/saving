@@ -7,16 +7,8 @@ function saveData() {
 function addPerson() {
   const nameInput = document.getElementById("personName");
   const name = nameInput.value.trim();
-  
-  if (!name) return alert("Please enter a name");
-  if (data[name]) return alert("This person already exists");
-
-  data[name] = {
-    USD: 0,
-    IQD: 0,
-    transactions: []
-  };
-
+  if (!name || data[name]) return alert("Invalid name or person exists");
+  data[name] = { USD: 0, IQD: 0, transactions: [] };
   nameInput.value = "";
   saveData();
   updateUI();
@@ -24,85 +16,37 @@ function addPerson() {
 
 function addTransaction() {
   const person = document.getElementById("personSelect").value;
-  const amountInput = document.getElementById("amount");
-  const amount = Number(amountInput.value);
+  const amount = Number(document.getElementById("amount").value);
   const currency = document.getElementById("currency").value;
-  const noteInput = document.getElementById("note");
-  const note = noteInput.value;
-
-  if (!person) return alert("Select a person first");
-  if (!amount || isNaN(amount)) return alert("Enter a valid amount");
-
+  const note = document.getElementById("note").value;
+  if (!person || !amount) return alert("Missing info");
   data[person][currency] += amount;
-  data[person].transactions.push({
-    amount,
-    currency,
-    note,
-    date: new Date().toLocaleDateString()
-  });
-
-  amountInput.value = "";
-  noteInput.value = "";
+  data[person].transactions.push({ amount, currency, note, date: new Date().toLocaleDateString() });
   saveData();
   updateUI();
-}
-
-function deletePerson(name) {
-    if(confirm(`Are you sure you want to delete ${name}?`)) {
-        delete data[name];
-        saveData();
-        updateUI();
-    }
-}
-
-function clearAllData() {
-    if(confirm("Erase EVERYTHING? This cannot be undone.")) {
-        data = {};
-        saveData();
-        updateUI();
-    }
 }
 
 function updateUI() {
   const select = document.getElementById("personSelect");
   const accounts = document.getElementById("accounts");
-  
-  const currentSelection = select.value;
-
   select.innerHTML = '<option value="" disabled selected>Select Person</option>';
   accounts.innerHTML = "";
-
   for (let name in data) {
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = name;
-    select.appendChild(option);
-
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
     const div = document.createElement("div");
-    div.className = "account-card";
-    div.innerHTML = `
-      <div class="account-header">
-        <strong>${name}</strong>
-        <button onclick="deletePerson('${name}')" style="background:none; color:red; font-size:12px; border:none; cursor:pointer;">Delete</button>
-      
-      <div class="balance-row">
-        <span>USD:</span> 
-        <span class="${data[name].USD >= 0 ? 'positive' : 'negative'}">$${data[name].USD.toLocaleString()}</span>
-      
-      <div class="balance-row">
-        <span>IQD:</span> 
-        <span class="${data[name].IQD >= 0 ? 'positive' : 'negative'}">${data[name].IQD.toLocaleString()} IQD</span>
-      
-      <ul class="history-list">
-        ${data[name].transactions.slice(-3).reverse().map(t => 
-          <li>${t.amount > 0 ? '+' : ''}${t.amount.toLocaleString()} ${t.currency} - ${t.note || 'No note'}</li>
-        ).join("")}
-      </ul>
-    `;
+    div.style.border = "1px solid #ccc";
+    div.style.margin = "10px 0";
+    div.style.padding = "10px";
+    div.innerHTML = "<strong>" + name + "</strong><br>USD: " + data[name].USD + "<br>IQD: " + data[name].IQD;
     accounts.appendChild(div);
   }
-  select.value = currentSelection;
+}
+
+function clearAllData() {
+  if(confirm("Delete all?")) { data = {}; saveData(); updateUI(); }
 }
 
 updateUI();
-
