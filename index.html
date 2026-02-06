@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Savings Tracker</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,28 +12,35 @@
 
 <div class="box">
   <h2>Add Person</h2>
-  <input id="personName" placeholder="Name">
-  <button onclick="addPerson()">Add</button>
+  <div class="input-group">
+    <input id="personName" placeholder="Enter name">
+    <button onclick="addPerson()" class="btn-add">Add</button>
+  </div>
 </div>
 
 <div class="box">
   <h2>Add Transaction</h2>
+  <div class="form-grid">
+    <select id="personSelect"></select>
+    
+    <div class="amount-row">
+      <input id="amount" type="number" placeholder="Amount (e.g. -500 to subtract)">
+      <select id="currency">
+        <option value="USD">USD</option>
+        <option value="IQD">IQD</option>
+      </select>
+    </div>
 
-  <select id="personSelect"></select>
-
-  <input id="amount" type="number" placeholder="Amount (can be negative)">
-  
-  <select id="currency">
-    <option value="USD">USD</option>
-    <option value="IQD">IQD</option>
-  </select>
-
-  <input id="note" placeholder="Note (optional)">
-  <button onclick="addTransaction()">Save</button>
+    <input id="note" placeholder="Note (optional)">
+    <button onclick="addTransaction()" class="btn-save">Save Transaction</button>
+  </div>
 </div>
 
 <div class="box">
-  <h2>Accounts</h2>
+  <div class="header-row">
+    <h2>Accounts</h2>
+    <button onclick="clearAllData()" class="btn-danger">Clear All Data</button>
+  </div>
   <div id="accounts"></div>
 </div>
 
