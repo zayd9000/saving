@@ -6,7 +6,8 @@ function saveData() {
 
 function addPerson() {
   const name = document.getElementById("personName").value.trim();
-  if (!name || data[name]) return;
+  if (!name) return alert("Enter a name!");
+  if (data[name]) return alert("Person already exists!");
 
   data[name] = {
     USD: 0,
@@ -25,7 +26,8 @@ function addTransaction() {
   const currency = document.getElementById("currency").value;
   const note = document.getElementById("note").value;
 
-  if (!person || isNaN(amount)) return;
+  if (!person) return alert("Select a person!");
+  if (isNaN(amount) || amount === 0) return alert("Enter a valid amount!");
 
   data[person][currency] += amount;
   data[person].transactions.push({
@@ -46,28 +48,38 @@ function updateUI() {
   const select = document.getElementById("personSelect");
   const accounts = document.getElementById("accounts");
 
-  select.innerHTML = "";
+  // Save current selection to restore it after refresh
+  const currentSelection = select.value;
+
+  select.innerHTML = '<option value="" disabled selected>Choose Person</option>';
   accounts.innerHTML = "";
 
   for (let name in data) {
+    // Add name to dropdown
     const option = document.createElement("option");
     option.value = name;
     option.textContent = name;
     select.appendChild(option);
 
+    // Add account card
     const div = document.createElement("div");
+    div.className = "box"; // Uses your existing CSS box style
     div.innerHTML = `
-      <h3>${name}</h3>
-      <p>USD: ${data[name].USD}</p>
-      <p>IQD: ${data[name].IQD}</p>
-      <ul>
-        ${data[name].transactions.map(t =>
-          <li>${t.amount} ${t.currency} — ${t.note || ""} (${t.date})</li>
+      <h3>👤 ${name}</h3>
+      <p><strong>USD:</strong> $${data[name].USD.toLocaleString()}</p>
+      <p><strong>IQD:</strong> ${data[name].IQD.toLocaleString()} IQD</p>
+      <hr>
+      <small>History:</small>
+      <ul style="font-size: 0.8em; color: #555;">
+        ${data[name].transactions.slice(-5).reverse().map(t => 
+          <li>${t.amount > 0 ? '+' : ''}${t.amount} ${t.currency} — ${t.note || "No note"}</li>
         ).join("")}
       </ul>
     `;
     accounts.appendChild(div);
   }
+  select.value = currentSelection;
 }
 
+// Run this when the page first loads
 updateUI();
