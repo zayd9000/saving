@@ -1,52 +1,31 @@
-let data = JSON.parse(localStorage.getItem("data")) || {};
-
-function saveData() {
-  localStorage.setItem("data", JSON.stringify(data));
-}
-
-function addPerson() {
-  const nameInput = document.getElementById("personName");
-  const name = nameInput.value.trim();
-  if (!name || data[name]) return alert("Name error");
-  data[name] = { USD: 0, IQD: 0, transactions: [] };
-  nameInput.value = "";
-  saveData();
-  updateUI();
-}
-
-function addTransaction() {
-  const person = document.getElementById("personSelect").value;
-  const amount = Number(document.getElementById("amount").value);
-  const currency = document.getElementById("currency").value;
-  if (!person || !amount) return alert("Missing info");
-  data[person][currency] += amount;
-  data[person].transactions.push({ amount: amount, currency: currency });
-  saveData();
-  updateUI();
-}
-
 function updateUI() {
   const select = document.getElementById("personSelect");
   const accounts = document.getElementById("accounts");
+  
+  // 1. Remember who was selected before the update
+  const currentSelection = select.value;
+
   select.innerHTML = '<option value="" disabled selected>Select Person</option>';
   accounts.innerHTML = "";
+
   for (let name in data) {
     const opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
     select.appendChild(opt);
+
     const div = document.createElement("div");
     div.style.background = "white";
     div.style.padding = "10px";
     div.style.marginTop = "10px";
     div.style.borderRadius = "8px";
-    div.innerHTML = "<strong>" + name + "</strong><br>USD: " + data[name].USD + "<br>IQD: " + data[name].IQD;
+    div.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+    div.innerHTML = "<strong>" + name + "</strong><br>USD: $" + data[name].USD.toLocaleString() + "<br>IQD: " + data[name].IQD.toLocaleString() + " IQD";
     accounts.appendChild(div);
   }
-}
 
-function clearAllData() {
-  if(confirm("Clear?")) { data = {}; saveData(); updateUI(); }
+  // 2. Put the selection back so you don't have to re-click!
+  if (currentSelection && data[currentSelection]) {
+    select.value = currentSelection;
+  }
 }
-
-updateUI();
