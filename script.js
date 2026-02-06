@@ -1,4 +1,3 @@
-
 let data = JSON.parse(localStorage.getItem("data")) || {};
 
 function saveData() {
@@ -25,9 +24,11 @@ function addPerson() {
 
 function addTransaction() {
   const person = document.getElementById("personSelect").value;
-  const amount = Number(document.getElementById("amount").value);
+  const amountInput = document.getElementById("amount");
+  const amount = Number(amountInput.value);
   const currency = document.getElementById("currency").value;
-  const note = document.getElementById("note").value;
+  const noteInput = document.getElementById("note");
+  const note = noteInput.value;
 
   if (!person) return alert("Select a person first");
   if (!amount || isNaN(amount)) return alert("Enter a valid amount");
@@ -40,8 +41,8 @@ function addTransaction() {
     date: new Date().toLocaleDateString()
   });
 
-  document.getElementById("amount").value = "";
-  document.getElementById("note").value = "";
+  amountInput.value = "";
+  noteInput.value = "";
   saveData();
   updateUI();
 }
@@ -66,17 +67,17 @@ function updateUI() {
   const select = document.getElementById("personSelect");
   const accounts = document.getElementById("accounts");
   
+  const currentSelection = select.value;
+
   select.innerHTML = '<option value="" disabled selected>Select Person</option>';
   accounts.innerHTML = "";
 
   for (let name in data) {
-    // Dropdown
     const option = document.createElement("option");
     option.value = name;
     option.textContent = name;
     select.appendChild(option);
 
-    // Account Card
     const div = document.createElement("div");
     div.className = "account-card";
     div.innerHTML = `
@@ -100,8 +101,7 @@ function updateUI() {
     `;
     accounts.appendChild(div);
   }
+  select.value = currentSelection;
 }
 
-// Start the UI
 updateUI();
-
