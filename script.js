@@ -1,39 +1,8 @@
-let data = JSON.parse(localStorage.getItem("walletData")) || {};
-
-function saveData() {
-  localStorage.setItem("walletData", JSON.stringify(data));
-}
-
-function addPerson() {
-  const nameInput = document.getElementById("personName");
-  const name = nameInput.value.trim();
-  if (!name || data[name]) return alert("Invalid Name");
-  data[name] = { USD: 0, IQD: 0, tuitionGoal: 0, transactions: [] };
-  nameInput.value = "";
-  saveData();
-  updateUI();
-}
-
-function addTransaction() {
-  const person = document.getElementById("personSelect").value;
-  const amount = Number(document.getElementById("amount").value);
-  const currency = document.getElementById("currency").value;
-  const note = document.getElementById("note").value || "General";
-
-  if (!person || !amount) return alert("Fill all fields");
-
-  data[person][currency] += amount;
-  data[person].transactions.push({ amount, currency, note });
-
-  document.getElementById("amount").value = "";
-  document.getElementById("note").value = "";
-  saveData();
-  updateUI();
-}
-
 function setGoal(name) {
   const val = document.getElementById(`input-${name}`).value;
+  const curr = document.getElementById(`curr-${name}`).value;
   data[name].tuitionGoal = Number(val) || 0;
+  data[name].goalCurrency = curr; // Saves if the goal is USD or IQD
   saveData();
   updateUI();
 }
@@ -51,8 +20,11 @@ function updateUI() {
     opt.value = name; opt.textContent = name;
     select.appendChild(opt);
 
+    // Logic for Dual-Currency Tuition
     const goal = data[name].tuitionGoal || 0;
-    const paid = data[name].USD; // Using USD for tuition
+    const goalCurr = data[name].goalCurrency || "USD";
+    const paid = data[name][goalCurr]; // Automatically looks at USD or IQD savings
+    
     const percent = goal > 0 ? Math.min((paid / goal) * 100, 100) : 0;
     const checkVal = goal > 0 ? (goal / 5).toLocaleString() : 0;
     const checksPaid = goal > 0 ? Math.floor(paid / (goal / 5)) : 0;
@@ -68,24 +40,29 @@ function updateUI() {
     div.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <strong style="font-size:1.1rem;">👤 ${name}</strong>
-        <button onclick="deletePerson('${name}')" style="background:none; color:#ccc; cursor:pointer; font-size:1.2rem;">✕</button>
+        <button onclick="deletePerson('${name}')" style="background:none; color:#ccc; cursor:pointer; font-size:1.2rem; border:none;">✕</button>
       </div>
       <div style="font-size:1.2rem; font-weight:bold; margin:5px 0;">$${data[name].USD.toLocaleString()} <small style="font-size:0.7rem; color:#718096;">USD</small></div>
       <div style="font-size:1rem; color:#4a5568;">${data[name].IQD.toLocaleString()} <small style="font-size:0.7rem;">IQD</small></div>
       
       <div class="goal-container">
         <div class="check-info">
-          <span>🎓 Tuition: $${goal.toLocaleString()}</span>
+          <span>🎓 Tuition: ${goal.toLocaleString()} ${goalCurr}</span>
           <span>${percent.toFixed(0)}%</span>
         </div>
         <div class="progress-bg"><div class="progress-fill" style="width:${percent}%"></div></div>
         <div style="font-size:0.7rem; color:#4a5568; display:flex; justify-content:space-between;">
-           <span>Check: $${checkVal}</span>
+           <span>Check: ${checkVal} ${goalCurr}</span>
            <span>Installments: ${checksPaid}/5</span>
         </div>
+        
         <div style="margin-top:8px; display:flex; gap:5px;">
-           <input type="number" id="input-${name}" placeholder="Yearly Amount" style="padding:4px; font-size:0.7rem; flex:1;">
-           <button onclick="setGoal('${name}')" style="padding:4px 8px; font-size:0.7rem; background:#718096; color:white; border-radius:5px;">Set</button>
+           <input type="number" id="input-${name}" placeholder="Amount" style="padding:4px; font-size:0.7rem; flex:2; border:1px solid #ddd; border-radius:5px;">
+           <select id="curr-${name}" style="padding:4px; font-size:0.7rem; flex:1; border:1px solid #ddd; border-radius:5px;">
+              <option value="USD" ${goalCurr === 'USD' ? 'selected' : ''}>USD</option>
+              <option value="IQD" ${goalCurr === 'IQD' ? 'selected' : ''}>IQD</option>
+           </select>
+           <button onclick="setGoal('${name}')" style="padding:4px 8px; font-size:0.7rem; background:#718096; color:white; border-radius:5px; cursor:pointer;">Set</button>
         </div>
       </div>
 
@@ -97,21 +74,3 @@ function updateUI() {
   }
   if (currentSelection && data[currentSelection]) select.value = currentSelection;
 }
-
-function deletePerson(name) {
-  if(confirm("Delete " + name + "?")) { delete data[name]; saveData(); updateUI(); }
-}
-
-function clearAllData() {
-  if(confirm("Erase all data?")) { data = {}; saveData(); updateUI(); }
-}
-
-function downloadBackup() {
-  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "wallet_backup.json";
-  a.click();
-}
-
-updateUI();
