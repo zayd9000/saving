@@ -1,16 +1,18 @@
-// Load saved data or start with empty
+// 1. Initialize data from memory
 let data = JSON.parse(localStorage.getItem("walletData")) || {};
 
+// 2. Save function
 function saveData() {
   localStorage.setItem("walletData", JSON.stringify(data));
 }
 
+// 3. Add Person function
 function addPerson() {
   const nameInput = document.getElementById("personName");
   const name = nameInput.value.trim();
   
   if (!name) return alert("Please enter a name");
-  if (data[name]) return alert("Person already exists");
+  if (data[name]) return alert("This person already exists");
 
   data[name] = { USD: 0, IQD: 0, transactions: [] };
   
@@ -19,19 +21,21 @@ function addPerson() {
   updateUI();
 }
 
+// 4. Add/Deduct Transaction function
 function addTransaction() {
   const person = document.getElementById("personSelect").value;
-  const amount = Number(document.getElementById("amount").value);
+  const amountInput = document.getElementById("amount");
+  const amount = Number(amountInput.value);
   const currency = document.getElementById("currency").value;
-  const note = document.getElementById("note").value || "No note";
+  const note = document.getElementById("note").value || "General";
 
-  if (!person) return alert("Please select a person first!");
-  if (!amount) return alert("Please enter an amount!");
+  if (!person) return alert("Select a person first");
+  if (!amount) return alert("Enter an amount");
 
-  // update the math
+  // Math: This handles both plus and minus
   data[person][currency] += amount;
 
-  // save the history
+  // Add to history
   data[person].transactions.push({
     amount: amount,
     currency: currency,
@@ -39,14 +43,14 @@ function addTransaction() {
     date: new Date().toLocaleDateString()
   });
 
-  // clear inputs
-  document.getElementById("amount").value = "";
+  amountInput.value = "";
   document.getElementById("note").value = "";
   
   saveData();
   updateUI();
 }
 
+// 5. Update the Screen
 function updateUI() {
   const select = document.getElementById("personSelect");
   const accounts = document.getElementById("accounts");
@@ -56,37 +60,37 @@ function updateUI() {
   accounts.innerHTML = "";
 
   for (let name in data) {
-    // Add name to dropdown
+    // Add to dropdown
     const opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
     select.appendChild(opt);
 
-    // Create history list
+    // Create history list (last 3 items)
     let historyHTML = "";
     const recent = data[name].transactions.slice(-3).reverse();
     recent.forEach(t => {
-      const color = t.amount >= 0 ? "#2ecc71" : "#e74c3c";
-      historyHTML += `<div style="color:${color}; font-size:12px; margin-bottom:2px;">
-        ${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} - ${t.note}
+      const color = t.amount >= 0 ? "#27ae60" : "#c0392b";
+      historyHTML += `<div style="color:${color}; font-size:12px; margin-bottom:3px;">
+        ${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} (${t.note})
       </div>`;
     });
 
-    // Create the account box
+    // Build the Wallet Card
     const div = document.createElement("div");
     div.className = "account-card";
     div.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <strong>👤 ${name}</strong>
-        <span style="font-size:11px; color:#95a5a6;">ID: ${name.toLowerCase()}</span>
+        <button onclick="deletePerson('${name}')" style="color:#bdc3c7; background:none; border:none; cursor:pointer;">✕</button>
       </div>
-      <div style="margin: 10px 0; border-bottom: 1px solid #eee; padding-bottom:10px;">
-        <div style="font-size: 1.1rem; color: #2c3e50;"><strong>$${data[name].USD.toLocaleString()}</strong> <small>USD</small></div>
-        <div style="font-size: 1.1rem; color: #3498db;"><strong>${data[name].IQD.toLocaleString()}</strong> <small>IQD</small></div>
+      <div style="margin: 10px 0;">
+        <div style="color:#2c3e50; font-size:1.2rem;">$${data[name].USD.toLocaleString()} <span style="font-size:12px; color:#95a5a6;">USD</span></div>
+        <div style="color:#2c3e50; font-size:1.2rem;">${data[name].IQD.toLocaleString()} <span style="font-size:12px; color:#95a5a6;">IQD</span></div>
       </div>
-      <div>
-        <p style="margin:0 0 5px 0; font-size:10px; color:#bdc3c7; font-weight:bold;">RECENT ACTIVITY</p>
-        ${historyHTML || '<div style="font-size:11px; color:#ccc;">No transactions yet</div>'}
+      <div style="border-top: 1px solid #f9f9f9; padding-top:10px;">
+        <p style="margin:0 0 5px 0; font-size:10px; color:#bdc3c7; letter-spacing:1px;">RECENT ACTIVITY</p>
+        ${historyHTML || '<div style="font-size:11px; color:#ccc;">No history yet</div>'}
       </div>
     `;
     accounts.appendChild(div);
@@ -97,13 +101,35 @@ function updateUI() {
   }
 }
 
+// 6. Delete One Person
+function deletePerson(name) {
+  if(confirm("Delete " + name + " and all their data?")) {
+    delete data[name];
+    saveData();
+    updateUI();
+  }
+}
+
+// 7. Reset Everything
 function clearAllData() {
-  if(confirm("This will delete ALL people and ALL money. Are you sure?")) {
+  if(confirm("WARNING: This will erase EVERYTHING! Are you sure?")) {
     data = {};
     saveData();
     updateUI();
   }
 }
 
-// Run UI on start
+// 8. Download Backup File
+function downloadBackup() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "Wallet_Backup_" + new Date().
+    toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// Start the app
 updateUI();
