@@ -1,86 +1,45 @@
 body {
-  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f0f2f5;
   padding: 20px;
   max-width: 500px;
   margin: 0 auto;
-  color: #333;
 }
-
-h1 { text-align: center; margin-bottom: 30px; }
 
 .box {
   background: white;
   padding: 20px;
   margin-bottom: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-h2 { margin-top: 0; font-size: 1.1rem; color: #555; }
+h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+h2 { margin-top: 0; font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; }
 
-.input-group, .form-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.amount-row {
-  display: flex;
-  gap: 5px;
-}
-
+.input-group, .form-grid { display: flex; flex-direction: column; gap: 12px; }
+.amount-row { display: flex; gap: 10px; }
 .amount-row input { flex: 2; }
 .amount-row select { flex: 1; }
 
 input, select, button {
   padding: 12px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 1rem;
+  outline: none;
 }
 
-button {
-  cursor: pointer;
-  font-weight: bold;
-  border: none;
-  transition: opacity 0.2s;
-}
-
-button:active { opacity: 0.7; }
-
-.btn-add { background: #007bff; color: white; }
-.btn-save { background: #28a745; color: white; }
-.btn-danger { background: #ff4d4d; color: white; padding: 5px 10px; font-size: 0.7rem; }
+.btn-add { background: #3498db; color: white; border: none; cursor: pointer; }
+.btn-save { background: #2ecc71; color: white; border: none; cursor: pointer; font-weight: bold; }
+.btn-danger { background: #e74c3c; color: white; border: none; padding: 5px 10px; font-size: 0.7rem; cursor: pointer; border-radius: 5px; }
+.btn-backup { background: #f39c12; color: white; border: none; padding: 5px 10px; font-size: 0.7rem; cursor: pointer; border-radius: 5px; }
 
 .account-card {
-  border: 1px solid #eee;
+  border-left: 5px solid #2ecc71;
   padding: 15px;
+  background: #fff;
+  margin-top: 15px;
   border-radius: 10px;
-  margin-bottom: 15px;
-  background: #f9f9f9;
-}
-
-.account-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 10px;
-}
-
-.balance-row {
-  display: flex;
-  justify-content: space-between;
-  margin: 5px 0;
-}
-
-.positive { color: #28a745; font-weight: bold; }
-.negative { color: #dc3545; font-weight: bold; }
-
-.history-list {
-  margin-top: 10px;
-  font-size: 0.8rem;
-  color: #666;
-  padding-left: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
