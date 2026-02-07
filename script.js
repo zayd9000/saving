@@ -20,7 +20,7 @@ function addTransaction() {
   const currency = document.getElementById("currency").value;
   const note = document.getElementById("note").value.trim() || "General";
 
-  if (!person || !amount) return alert("Please select a person and enter amount");
+  if (!person || !amount) return alert("Select a person and enter amount");
 
   data[person][currency] += amount;
   data[person].transactions.push({
@@ -48,16 +48,15 @@ function updateUI() {
     opt.textContent = name;
     select.appendChild(opt);
 
-    // --- THE MATH SECTION ---
-    const usdInIqd = data[name].USD * rate;           // Dollar to Dinar
-    const iqdInUsd = data[name].IQD / rate;           // Dinar to Dollar
+    const usdInIqd = data[name].USD * rate;
+    const iqdInUsd = data[name].IQD / rate;
     const totalValueInIqd = data[name].IQD + usdInIqd;
     const totalValueInUsd = data[name].USD + iqdInUsd;
 
     let historyHTML = "";
     data[name].transactions.slice(-3).reverse().forEach(t => {
-      const historyClass = t.amount >= 0 ? "history-item-positive" : "history-item-negative";
-      historyHTML += <div class="${historyClass}">${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} (${t.note})</div>;
+      const hClass = t.amount >= 0 ? "history-item-positive" : "history-item-negative";
+      historyHTML += <div class="${hClass}">${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency}</div>;
     });
 
     const div = document.createElement("div");
@@ -70,15 +69,14 @@ function updateUI() {
       <div style="margin: 15px 0; border-bottom: 1px solid #f0f0f0; padding-bottom:15px;">
         <div class="currency-value">$${data[name].USD.toLocaleString()} <small>USD</small></div>
         <div class="currency-value">${data[name].IQD.toLocaleString()} <small>IQD</small></div>
-        
         <div style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
-           <div class="total-value-iqd">Total as IQD: <strong>${totalValueInIqd.toLocaleString()} IQD</strong></div>
+           <div class="total-value-iqd">Total as IQD: <strong>${totalValueInIqd.toLocaleString()}</strong></div>
            <div class="total-value-iqd" style="background:#fff4e6; color:#e67e22;">Total as USD: <strong>$${totalValueInUsd.toFixed(2)}</strong></div>
         </div>
       </div>
       <div>
         <p class="recent-history-title">RECENT ACTIVITY</p>
-        ${historyHTML || '<div class="no-history">No history yet</div>'}
+        ${historyHTML || '<div class="no-history">No history</div>'}
       </div>
     `;
     accounts.appendChild(div);
@@ -95,13 +93,11 @@ function clearAllData() {
 }
 
 function downloadBackup() {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "Wallet_Backup_" + new Date().toISOString().slice(0,10) + ".json";
-  document.body.appendChild(a);
+  a.download = "Wallet_Backup.json";
   a.click();
-  document.body.removeChild(a);
 }
 
 updateUI();
