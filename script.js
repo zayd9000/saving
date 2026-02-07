@@ -39,9 +39,15 @@ function addGoal(name) {
   updateUI();
 }
 
-function updatePaidAmount(personName, goalIndex) {
-  const newVal = Number(document.getElementById(`paid-${personName}-${goalIndex}`).value);
-  data[personName].goals[goalIndex].paid = newVal || 0;
+// NEW: This adds money to the existing paid amount
+function manualAddGoalPayment(personName, goalIndex) {
+  const input = document.getElementById(`addPay-${personName}-${goalIndex}`);
+  const addAmount = Number(input.value);
+  
+  if (!addAmount || addAmount <= 0) return alert("Enter amount to add");
+
+  data[personName].goals[goalIndex].paid = (data[personName].goals[goalIndex].paid || 0) + addAmount;
+  input.value = ""; // Clear input
   saveData();
   updateUI();
 }
@@ -71,8 +77,9 @@ function updateUI() {
 
     let goalsHTML = "";
     (data[name].goals || []).forEach((goal, index) => {
-      const percent = Math.min(((goal.paid || 0) / goal.target) * 100, 100);
-      const remaining = goal.target - (goal.paid || 0);
+      const paid = goal.paid || 0;
+      const percent = Math.min((paid / goal.target) * 100, 100);
+      const remaining = goal.target - paid;
       
       goalsHTML += `
         <div style="background:#fff; padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid #e2e8f0;">
@@ -85,12 +92,13 @@ function updateUI() {
             <div style="background:#48bb78; height:100%; width:${percent}%; transition:0.5s;"></div>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:0.7rem; font-weight:bold; margin-bottom:8px;">
-            <span>${percent.toFixed(0)}% Paid</span>
+            <span>Saved: ${paid.toLocaleString()} (${percent.toFixed(0)}%)</span>
             <span style="color:#e53e3e;">Left: ${remaining.toLocaleString()}</span>
           </div>
-          <div style="display:flex; gap:5px;">
-            <input type="number" id="paid-${name}-${index}" value="${goal.paid}" placeholder="Paid Amount" style="flex:2; font-size:0.7rem; padding:4px; border:1px solid #cbd5e0; border-radius:4px;">
-            <button onclick="updatePaidAmount('${name}', ${index})" style="flex:1; background:#4a5568; color:white; font-size:0.6rem; border-radius:4px; border:none; cursor:pointer;">Update</button>
+          
+          <div style="display:flex; gap:5px; margin-top:5px;">
+            <input type="number" id="addPay-${name}-${index}" placeholder="+ Add Payment" style="flex:2; font-size:0.7rem; padding:6px; border:1px solid #cbd5e0; border-radius:4px;">
+            <button onclick="manualAddGoalPayment('${name}', ${index})" style="flex:1; background:#48bb78; color:white; font-size:0.8rem; border-radius:4px; border:none; cursor:pointer; font-weight:bold;">+</button>
           </div>
         </div>
       `;
@@ -111,7 +119,7 @@ function updateUI() {
         <div style="margin-top:10px; border-top:1px solid #cbd5e0; padding-top:10px; display:flex; flex-direction:column; gap:5px;">
            <input type="text" id="gName-${name}" placeholder="Goal Name" style="padding:6px; font-size:0.7rem;">
            <div style="display:flex; gap:5px;">
-             <input type="number" id="gPrice-${name}" placeholder="Price" style="padding:6px; font-size:0.7rem; flex:2;">
+             <input type="number" id="gPrice-${name}" placeholder="Total Price" style="padding:6px; font-size:0.7rem; flex:2;">
              <select id="gCurr-${name}" style="padding:6px; font-size:0.7rem; flex:1;">
                 <option value="USD">USD</option>
                 <option value="IQD">IQD</option>
