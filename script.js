@@ -51,7 +51,7 @@ function updateUI() {
     const usdVal = data[name].USD;
     const iqdVal = data[name].IQD;
     
-    // Bidirectional conversion math
+    // Math for both directions
     const totalInIqd = iqdVal + (usdVal * rate);
     const totalInUsd = usdVal + (iqdVal / rate);
 
@@ -65,17 +65,20 @@ function updateUI() {
     div.className = "account-card";
     div.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong>👤 ${name}</strong>
-        <button onclick="deletePerson('${name}')" style="background:none; color:#eee; font-size:1.2rem;">✕</button>
+        <strong style="font-size: 1.1rem;">👤 ${name}</strong>
+        <button onclick="deletePerson('${name}')" style="background:none; color:#eee; font-size:1.2rem; border:none; cursor:pointer;">✕</button>
       </div>
-      <div style="margin: 15px 0;">
+      <div style="margin: 15px 0; border-bottom:1px solid #f0f0f0; padding-bottom:15px;">
         <div class="currency-value">$${usdVal.toLocaleString()} <small>USD</small></div>
         <div class="currency-value">${iqdVal.toLocaleString()} <small>IQD</small></div>
+        
+        <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+           <div class="total-pill" style="background:#e3f2fd; color:#1976d2;">Total in IQD: <strong>${totalInIqd.toLocaleString()}</strong></div>
+           <div class="total-pill" style="background:#fff3e0; color:#e65100;">Total in USD: <strong>$${totalInUsd.toFixed(2)}</strong></div>
+        </div>
       </div>
-      <div class="total-pill" style="background:#e3f2fd; color:#1976d2;">Total in IQD: ${totalInIqd.toLocaleString()}</div>
-      <div class="total-pill" style="background:#fff3e0; color:#e65100;">Total in USD: $${totalInUsd.toFixed(2)}</div>
-      <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
-        <p style="margin:0; font-size:9px; color:#ccc;">RECENT HISTORY</p>
+      <div>
+        <p class="recent-history-title" style="margin:0; font-size:9px; color:#ccc; letter-spacing:1px;">RECENT ACTIVITY</p>
         ${historyHTML || '<div style="color:#eee; font-size:11px;">No transactions</div>'}
       </div>
     `;
