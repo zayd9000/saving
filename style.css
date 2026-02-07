@@ -1,36 +1,103 @@
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f0f2f5;
-  padding: 20px;
-  max-width: 500px;
-  margin: 0 auto;
+let data = JSON.parse(localStorage.getItem("walletData")) || {};
+
+function saveData() {
+  localStorage.setItem("walletData", JSON.stringify(data));
 }
 
-.box {
-  background: white;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+function addPerson() {
+  const nameInput = document.getElementById("personName");
+  const name = nameInput.value.trim();
+  if (!name || data[name]) return alert("Invalid name");
+  data[name] = { USD: 0, IQD: 0, transactions: [] };
+  nameInput.value = "";
+  saveData();
+  updateUI();
 }
 
-h1 { text-align: center; color: #2c3e50; }
-h2 { margin: 0 0 10px 0; font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; }
+function addTransaction() {
+  const person = document.getElementById("personSelect").value;
+  const amount = Number(document.getElementById("amount").value);
+  const currency = document.getElementById("currency").value;
+  const note = document.getElementById("note").value || "General";
 
-.input-group, .form-grid { display: flex; flex-direction: column; gap: 12px; }
-.amount-row { display: flex; gap: 10px; }
-input, select, button { padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; }
+  if (!person || !amount) return alert("Fill all info");
 
-.btn-add { background: #3498db; color: white; border: none; cursor: pointer; }
-.btn-save { background: #2ecc71; color: white; border: none; cursor: pointer; font-weight: bold; }
-.btn-danger { background: #e74c3c; color: white; border: none; padding: 5px 10px; font-size: 0.7rem; cursor: pointer; border-radius: 5px; }
-.btn-backup { background: #f39c12; color: white; border: none; padding: 5px 10px; font-size: 0.7rem; cursor: pointer; border-radius: 5px; }
+  data[person][currency] += amount;
+  data[person].transactions.push({
+    amount, currency, note, date: new Date().toLocaleDateString()
+  });
 
-.account-card {
-  border-left: 5px solid #2ecc71;
-  padding: 15px;
-  background: #fff;
-  margin-top: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  document.getElementById("amount").value = "";
+  document.getElementById("note").value = "";
+  saveData();
+  updateUI();
 }
+
+function updateUI() {
+  const select = document.getElementById("personSelect");
+  const accounts = document.getElementById("accounts");
+  const rate = Number(document.getElementById("exchangeRate").value) || 1500;
+  const currentSelection = select.value;
+
+  select.innerHTML = '<option value="" disabled selected>Select Person</option>';
+  accounts.innerHTML = "";
+
+  for (let name in data) {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+
+    // Calculate conversion
+    const usdInIqd = data[name].USD * rate;
+    const totalValueInIqd = data[name].IQD + usdInIqd;
+
+    let historyHTML = "";
+    data[name].transactions.slice(-3).reverse().forEach(t => {
+      const color = t.amount >= 0 ? "#27ae60" : "#c0392b";
+      historyHTML += <div style="color:${color}; font-size:11px;">${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} (${t.note})</div>;
+    });
+
+    const div = document.createElement("div");
+    div.className = "account-card";
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between;">
+        <strong>👤 ${name}</strong>
+        <button onclick="deletePerson('${name}')" style="border:none; background:none; color:#ccc; cursor:pointer;">✕</button>
+      </div>
+      <div style="margin: 10px 0; border-bottom: 1px solid #eee; padding-bottom:10px;">
+        <div style="color:#2c3e50;"><strong>$${data[name].USD.toLocaleString()}</strong> <small>USD</small></div>
+        <div style="color:#2c3e50;"><strong>${data[name].IQD.toLocaleString()}</strong> <small>IQD</small></div>
+        <div style="margin-top:5px; font-size:12px; color:#7f8c8d; background:#f9f9f9; padding:5px; border-radius:5px;">
+           Total Value: <strong>${totalValueInIqd.toLocaleString()} IQD</strong>
+        </div>
+      </div>
+      <div>
+        <p style="margin:0; font-size:9px; color:#bdc3c7;">RECENT HISTORY</p>
+        ${historyHTML || '<div style="font-size:11px; color:#ccc;">No history</div>'}
+      </div>
+    `;
+    accounts.appendChild(div);
+  }
+  if (currentSelection && data[currentSelection]) select.value = currentSelection;
+}
+
+function deletePerson(name) {
+  if(confirm("Delete " + name + "?")) { delete data[name]; saveData(); updateUI(); }
+}
+
+function clearAllData() {
+  if(confirm("Reset all?")) { data = {}; saveData(); updateUI(); }
+}
+
+function downloadBackup() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "Wallet_Backup.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+updateUI();
