@@ -3,23 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Smart Wallet</title>
+  <title>Smart Wallet</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>💰 My Smart Wallet</h1>
-
-  <div class="box">
-    <h2>Exchange Rate (1 USD = ?)</h2>
-    <input id="exchangeRate" type="number" value="1500" oninput="updateUI()">
-    <p style="font-size: 10px; color: #7f8c8d; margin-top: 5px;">Change this to update conversions below.</p>
-  </div>
+  <h1>💰 Smart Wallet</h1>
 
   <div class="box">
     <h2>Add New Person</h2>
     <div class="input-group">
-      <input id="personName" placeholder="Enter name (e.g., Zayd)">
+      <input id="personName" placeholder="Name (e.g., Zayd)">
       <button onclick="addPerson()" class="btn-add">Add Person</button>
     </div>
   </div>
@@ -29,13 +23,13 @@
     <div class="form-grid">
       <select id="personSelect"></select>
       <div class="amount-row">
-        <input id="amount" type="number" placeholder="Amount (- to deduct)">
+        <input id="amount" type="number" placeholder="Amount (- to subtract)">
         <select id="currency">
           <option value="USD">USD</option>
           <option value="IQD">IQD</option>
         </select>
       </div>
-      <input id="note" placeholder="What is this for?">
+      <input id="note" placeholder="What's this for?">
       <button onclick="addTransaction()" class="btn-save">Save Transaction</button>
     </div>
   </div>
@@ -51,8 +45,6 @@
     <div id="accounts"></div>
   </div>
 
-  <script src="script.js?v=15"></script>
+  <script src="script.js?v=20"></script>
 </body>
 </html>
-
-
