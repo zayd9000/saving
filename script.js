@@ -1,56 +1,38 @@
-// 1. Initialize data from memory
 let data = JSON.parse(localStorage.getItem("walletData")) || {};
 
-// 2. Save function
 function saveData() {
   localStorage.setItem("walletData", JSON.stringify(data));
 }
 
-// 3. Add Person function
 function addPerson() {
   const nameInput = document.getElementById("personName");
   const name = nameInput.value.trim();
-  
-  if (!name) return alert("Please enter a name");
-  if (data[name]) return alert("This person already exists");
-
+  if (!name || data[name]) return alert("Invalid name");
   data[name] = { USD: 0, IQD: 0, transactions: [] };
-  
   nameInput.value = "";
   saveData();
   updateUI();
 }
 
-// 4. Add/Deduct Transaction function
 function addTransaction() {
   const person = document.getElementById("personSelect").value;
-  const amountInput = document.getElementById("amount");
-  const amount = Number(amountInput.value);
+  const amount = Number(document.getElementById("amount").value);
   const currency = document.getElementById("currency").value;
-  const note = document.getElementById("note").value.trim() || "General"; // Trim note
+  const note = document.getElementById("note").value.trim() || "General";
 
-  if (!person) return alert("Select a person first");
-  if (!amount) return alert("Enter an amount");
+  if (!person || !amount) return alert("Please select a person and enter amount");
 
-  // Math: This handles both plus and minus
   data[person][currency] += amount;
-
-  // Add to history
   data[person].transactions.push({
-    amount: amount,
-    currency: currency,
-    note: note,
-    date: new Date().toLocaleDateString()
+    amount, currency, note, date: new Date().toLocaleDateString()
   });
 
-  amountInput.value = "";
+  document.getElementById("amount").value = "";
   document.getElementById("note").value = "";
-  
   saveData();
   updateUI();
 }
 
-// 5. Update the Screen
 function updateUI() {
   const select = document.getElementById("personSelect");
   const accounts = document.getElementById("accounts");
@@ -61,27 +43,23 @@ function updateUI() {
   accounts.innerHTML = "";
 
   for (let name in data) {
-    // Add name to dropdown
     const opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
     select.appendChild(opt);
 
-    // Calculate conversion
-    const usdInIqd = data[name].USD * rate;
+    // --- THE MATH SECTION ---
+    const usdInIqd = data[name].USD * rate;           // Dollar to Dinar
+    const iqdInUsd = data[name].IQD / rate;           // Dinar to Dollar
     const totalValueInIqd = data[name].IQD + usdInIqd;
+    const totalValueInUsd = data[name].USD + iqdInUsd;
 
-    // Create history list (last 3 items)
     let historyHTML = "";
-    const recent = data[name].transactions.slice(-3).reverse();
-    recent.forEach(t => {
+    data[name].transactions.slice(-3).reverse().forEach(t => {
       const historyClass = t.amount >= 0 ? "history-item-positive" : "history-item-negative";
-      historyHTML += `<div class="${historyClass}">
-        ${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} (${t.note})
-      </div>`;
+      historyHTML += <div class="${historyClass}">${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} (${t.note})</div>;
     });
 
-    // Build the Wallet Card
     const div = document.createElement("div");
     div.className = "account-card";
     div.innerHTML = `
@@ -92,8 +70,10 @@ function updateUI() {
       <div style="margin: 15px 0; border-bottom: 1px solid #f0f0f0; padding-bottom:15px;">
         <div class="currency-value">$${data[name].USD.toLocaleString()} <small>USD</small></div>
         <div class="currency-value">${data[name].IQD.toLocaleString()} <small>IQD</small></div>
-        <div class="total-value-iqd">
-           Total Value: <strong>${totalValueInIqd.toLocaleString()} IQD</strong>
+        
+        <div style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
+           <div class="total-value-iqd">Total as IQD: <strong>${totalValueInIqd.toLocaleString()} IQD</strong></div>
+           <div class="total-value-iqd" style="background:#fff4e6; color:#e67e22;">Total as USD: <strong>$${totalValueInUsd.toFixed(2)}</strong></div>
         </div>
       </div>
       <div>
@@ -103,32 +83,17 @@ function updateUI() {
     `;
     accounts.appendChild(div);
   }
-
-  // Restore previous selection
-  if (currentSelection && data[currentSelection]) {
-    select.value = currentSelection;
-  }
+  if (currentSelection && data[currentSelection]) select.value = currentSelection;
 }
 
-// 6. Delete One Person
 function deletePerson(name) {
-  if(confirm("Delete " + name + " and all their data?")) {
-    delete data[name];
-    saveData();
-    updateUI();
-  }
+  if(confirm("Delete " + name + "?")) { delete data[name]; saveData(); updateUI(); }
 }
 
-// 7. Reset Everything
 function clearAllData() {
-  if(confirm("WARNING: This will erase EVERYTHING! Are you sure?")) {
-    data = {};
-    saveData();
-    updateUI();
-  }
+  if(confirm("Reset all?")) { data = {}; saveData(); updateUI(); }
 }
 
-// 8.Download Backup File
 function downloadBackup() {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
@@ -139,5 +104,4 @@ function downloadBackup() {
   document.body.removeChild(a);
 }
 
-// Start the app
 updateUI();
