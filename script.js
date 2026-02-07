@@ -27,7 +27,7 @@ function addTransaction() {
   const amountInput = document.getElementById("amount");
   const amount = Number(amountInput.value);
   const currency = document.getElementById("currency").value;
-  const note = document.getElementById("note").value || "General";
+  const note = document.getElementById("note").value.trim() || "General"; // Trim note
 
   if (!person) return alert("Select a person first");
   if (!amount) return alert("Enter an amount");
@@ -54,24 +54,29 @@ function addTransaction() {
 function updateUI() {
   const select = document.getElementById("personSelect");
   const accounts = document.getElementById("accounts");
+  const rate = Number(document.getElementById("exchangeRate").value) || 1500;
   const currentSelection = select.value;
 
   select.innerHTML = '<option value="" disabled selected>Select Person</option>';
   accounts.innerHTML = "";
 
   for (let name in data) {
-    // Add to dropdown
+    // Add name to dropdown
     const opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
     select.appendChild(opt);
 
+    // Calculate conversion
+    const usdInIqd = data[name].USD * rate;
+    const totalValueInIqd = data[name].IQD + usdInIqd;
+
     // Create history list (last 3 items)
     let historyHTML = "";
     const recent = data[name].transactions.slice(-3).reverse();
     recent.forEach(t => {
-      const color = t.amount >= 0 ? "#27ae60" : "#c0392b";
-      historyHTML += `<div style="color:${color}; font-size:12px; margin-bottom:3px;">
+      const historyClass = t.amount >= 0 ? "history-item-positive" : "history-item-negative";
+      historyHTML += `<div class="${historyClass}">
         ${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} (${t.note})
       </div>`;
     });
@@ -81,21 +86,25 @@ function updateUI() {
     div.className = "account-card";
     div.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong>👤 ${name}</strong>
-        <button onclick="deletePerson('${name}')" style="color:#bdc3c7; background:none; border:none; cursor:pointer;">✕</button>
+        <strong style="font-size: 1.1rem;">👤 ${name}</strong>
+        <button onclick="deletePerson('${name}')" style="border:none; background:none; color:#ddd; cursor:pointer; font-size:1.2rem;">✕</button>
       </div>
-      <div style="margin: 10px 0;">
-        <div style="color:#2c3e50; font-size:1.2rem;">$${data[name].USD.toLocaleString()} <span style="font-size:12px; color:#95a5a6;">USD</span></div>
-        <div style="color:#2c3e50; font-size:1.2rem;">${data[name].IQD.toLocaleString()} <span style="font-size:12px; color:#95a5a6;">IQD</span></div>
+      <div style="margin: 15px 0; border-bottom: 1px solid #f0f0f0; padding-bottom:15px;">
+        <div class="currency-value">$${data[name].USD.toLocaleString()} <small>USD</small></div>
+        <div class="currency-value">${data[name].IQD.toLocaleString()} <small>IQD</small></div>
+        <div class="total-value-iqd">
+           Total Value: <strong>${totalValueInIqd.toLocaleString()} IQD</strong>
+        </div>
       </div>
-      <div style="border-top: 1px solid #f9f9f9; padding-top:10px;">
-        <p style="margin:0 0 5px 0; font-size:10px; color:#bdc3c7; letter-spacing:1px;">RECENT ACTIVITY</p>
-        ${historyHTML || '<div style="font-size:11px; color:#ccc;">No history yet</div>'}
+      <div>
+        <p class="recent-history-title">RECENT ACTIVITY</p>
+        ${historyHTML || '<div class="no-history">No history yet</div>'}
       </div>
     `;
     accounts.appendChild(div);
   }
 
+  // Restore previous selection
   if (currentSelection && data[currentSelection]) {
     select.value = currentSelection;
   }
@@ -119,13 +128,12 @@ function clearAllData() {
   }
 }
 
-// 8. Download Backup File
+// 8.Download Backup File
 function downloadBackup() {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "Wallet_Backup_" + new Date().
-    toISOString().slice(0,10) + ".json";
+  a.download = "Wallet_Backup_" + new Date().toISOString().slice(0,10) + ".json";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
