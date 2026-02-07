@@ -7,7 +7,7 @@ function saveData() {
 function addPerson() {
   const nameInput = document.getElementById("personName");
   const name = nameInput.value.trim();
-  if (!name || data[name]) return alert("Invalid name");
+  if (!name || data[name]) return alert("Name missing or already exists");
   data[name] = { USD: 0, IQD: 0, transactions: [] };
   nameInput.value = "";
   saveData();
@@ -18,9 +18,9 @@ function addTransaction() {
   const person = document.getElementById("personSelect").value;
   const amount = Number(document.getElementById("amount").value);
   const currency = document.getElementById("currency").value;
-  const note = document.getElementById("note").value.trim() || "General";
+  const note = document.getElementById("note").value || "General";
 
-  if (!person || !amount) return alert("Select a person and enter amount");
+  if (!person || !amount) return alert("Select person and amount");
 
   data[person][currency] += amount;
   data[person].transactions.push({
@@ -48,35 +48,35 @@ function updateUI() {
     opt.textContent = name;
     select.appendChild(opt);
 
-    const usdInIqd = data[name].USD * rate;
-    const iqdInUsd = data[name].IQD / rate;
-    const totalValueInIqd = data[name].IQD + usdInIqd;
-    const totalValueInUsd = data[name].USD + iqdInUsd;
+    const usdVal = data[name].USD;
+    const iqdVal = data[name].IQD;
+    
+    // Bidirectional conversion math
+    const totalInIqd = iqdVal + (usdVal * rate);
+    const totalInUsd = usdVal + (iqdVal / rate);
 
     let historyHTML = "";
     data[name].transactions.slice(-3).reverse().forEach(t => {
-      const hClass = t.amount >= 0 ? "history-item-positive" : "history-item-negative";
-      historyHTML += <div class="${hClass}">${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency}</div>;
+      const color = t.amount >= 0 ? "#2ecc71" : "#e74c3c";
+      historyHTML += <div style="color:${color}; font-size:11px;">${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} (${t.note})</div>;
     });
 
     const div = document.createElement("div");
     div.className = "account-card";
     div.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong style="font-size: 1.1rem;">👤 ${name}</strong>
-        <button onclick="deletePerson('${name}')" style="border:none; background:none; color:#ddd; cursor:pointer; font-size:1.2rem;">✕</button>
+        <strong>👤 ${name}</strong>
+        <button onclick="deletePerson('${name}')" style="background:none; color:#eee; font-size:1.2rem;">✕</button>
       </div>
-      <div style="margin: 15px 0; border-bottom: 1px solid #f0f0f0; padding-bottom:15px;">
-        <div class="currency-value">$${data[name].USD.toLocaleString()} <small>USD</small></div>
-        <div class="currency-value">${data[name].IQD.toLocaleString()} <small>IQD</small></div>
-        <div style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
-           <div class="total-value-iqd">Total as IQD: <strong>${totalValueInIqd.toLocaleString()}</strong></div>
-           <div class="total-value-iqd" style="background:#fff4e6; color:#e67e22;">Total as USD: <strong>$${totalValueInUsd.toFixed(2)}</strong></div>
-        </div>
+      <div style="margin: 15px 0;">
+        <div class="currency-value">$${usdVal.toLocaleString()} <small>USD</small></div>
+        <div class="currency-value">${iqdVal.toLocaleString()} <small>IQD</small></div>
       </div>
-      <div>
-        <p class="recent-history-title">RECENT ACTIVITY</p>
-        ${historyHTML || '<div class="no-history">No history</div>'}
+      <div class="total-pill" style="background:#e3f2fd; color:#1976d2;">Total in IQD: ${totalInIqd.toLocaleString()}</div>
+      <div class="total-pill" style="background:#fff3e0; color:#e65100;">Total in USD: $${totalInUsd.toFixed(2)}</div>
+      <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
+        <p style="margin:0; font-size:9px; color:#ccc;">RECENT HISTORY</p>
+        ${historyHTML || '<div style="color:#eee; font-size:11px;">No transactions</div>'}
       </div>
     `;
     accounts.appendChild(div);
@@ -89,7 +89,7 @@ function deletePerson(name) {
 }
 
 function clearAllData() {
-  if(confirm("Reset all?")) { data = {}; saveData(); updateUI(); }
+  if(confirm("Erase everything?")) { data = {}; saveData(); updateUI(); }
 }
 
 function downloadBackup() {
