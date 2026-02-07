@@ -50,7 +50,7 @@ function updateUI() {
         let historyHTML = "";
         data[name].transactions.slice(-3).reverse().forEach(t => {
             const color = t.amount >= 0 ? "#2ecc71" : "#e74c3c";
-            historyHTML += <div style="color:${color}; font-size:11px;">${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} (${t.note})</div>;
+            historyHTML += <div style="color:${color}; font-size:11px;"${t.amount > 0 ? '+':''}${t.amount.toLocaleString()} ${t.currency} (${t.note})</div>;
         });
 
         const div = document.createElement("div");
@@ -92,3 +92,4 @@ function downloadBackup() {
 }
 
 updateUI();
+
