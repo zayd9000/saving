@@ -1,56 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Smart Wallet</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Wallet v2.0</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <div class="box" style="display: flex; justify-content: center; gap: 8px; padding: 10px; flex-wrap: wrap; background: #edf2f7; border-radius: 12px; margin-bottom: 15px;">
+            <button onclick="setLanguage('en')" style="padding: 6px 12px; font-size: 0.75rem; background: #2d3748; color: white; border-radius: 6px; border: none; cursor: pointer;">English</button>
+            <button onclick="setLanguage('ar')" style="padding: 6px 12px; font-size: 0.75rem; background: #2d3748; color: white; border-radius: 6px; border: none; cursor: pointer;">العربية</button>
+            <button onclick="setLanguage('iq')" style="padding: 6px 12px; font-size: 0.75rem; background: #4a5568; color: white; border-radius: 6px; border: none; cursor: pointer;">عراقي</button>
+            <button onclick="setLanguage('ku')" style="padding: 6px 12px; font-size: 0.75rem; background: #2d3748; color: white; border-radius: 6px; border: none; cursor: pointer;">کوردی</button>
+        </div>
 
-  <h1>💰 My Smart Wallet</h1>
+        <div class="box">
+            <h2 id="titleAddPerson">Add New Person</h2>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="personName" placeholder="Name" style="flex: 3;">
+                <button onclick="addPerson()" style="flex: 1;">+</button>
+            </div>
+        </div>
 
-  <div class="box">
-    <h2>Exchange Rate (1 USD = ?)</h2>
-    <input id="exchangeRate" type="number" value="1500" oninput="updateUI()" placeholder="Enter Rate (e.g. 1500)">
-    <p style="font-size: 10px; color: #7f8c8d; margin-top: 5px;">Change this to update conversions below.</p>
-  </div>
+        <div class="box">
+            <h2 id="titleTransaction">Transaction</h2>
+            <select id="personSelect"></select>
+            <div style="display: flex; gap: 5px; margin-top: 10px;">
+                <input type="number" id="amount" placeholder="Amount" style="flex: 2;">
+                <select id="currency" style="flex: 1;">
+                    <option value="USD">USD</option>
+                    <option value="IQD">IQD</option>
+                </select>
+            </div>
+            <input type="text" id="note" placeholder="Note" style="margin-top: 10px;">
+            <button onclick="addTransaction()" style="width: 100%; margin-top: 10px; background: #4a5568; color: white; height: 45px; border-radius: 8px;" id="btnSave">Save</button>
+        </div>
 
-  <div class="box">
-    <h2>Add New Person</h2>
-    <div class="input-group">
-      <input id="personName" placeholder="Enter name">
-      <button onclick="addPerson()" class="btn-add">Add Person</button>
+        <div id="accounts"></div>
+
+        <button onclick="clearAllData()" style="width: 100%; background: none; color: #a0aec0; border: none; margin-top: 20px; font-size: 0.8rem;" id="btnClear">Clear All Data</button>
     </div>
-  </div>
 
-  <div class="box">
-    <h2>Add/Deduct Money</h2>
-    <div class="form-grid">
-      <select id="personSelect"></select>
-      <div class="amount-row">
-        <input id="amount" type="number" placeholder="Amount (- to deduct)">
-        <select id="currency">
-          <option value="USD">USD</option>
-          <option value="IQD">IQD</option>
-        </select>
-      </div>
-      <input id="note" placeholder="Note (Optional)">
-      <button onclick="addTransaction()" class="btn-save">Save Transaction</button>
-    </div>
-  </div>
-
-  <div class="box">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <h2>Accounts</h2>
-      <div>
-        <button onclick="downloadBackup()" class="btn-backup">Backup</button>
-        <button onclick="clearAllData()" class="btn-danger">Reset</button>
-      </div>
-    </div>
-    <div id="accounts"></div>
-  </div>
-
-  <script src="script.js?v=40"></script>
+    <script src="script.js?v=50"></script>
 </body>
 </html>
