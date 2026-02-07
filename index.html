@@ -12,14 +12,14 @@
 
   <div class="box">
     <h2>Exchange Rate (1 USD = ?)</h2>
-    <input id="exchangeRate" type="number" value="1500" oninput="updateUI()" placeholder="Enter Rate (e.g. 1500)">
+    <input id="exchangeRate" type="number" value="1500" oninput="updateUI()">
     <p style="font-size: 10px; color: #7f8c8d; margin-top: 5px;">Change this to update conversions below.</p>
   </div>
 
   <div class="box">
     <h2>Add New Person</h2>
     <div class="input-group">
-      <input id="personName" placeholder="Enter name">
+      <input id="personName" placeholder="Enter name (e.g., Zayd)">
       <button onclick="addPerson()" class="btn-add">Add Person</button>
     </div>
   </div>
@@ -35,7 +35,7 @@
           <option value="IQD">IQD</option>
         </select>
       </div>
-      <input id="note" placeholder="Note (Optional)">
+      <input id="note" placeholder="What is this for?">
       <button onclick="addTransaction()" class="btn-save">Save Transaction</button>
     </div>
   </div>
@@ -51,9 +51,6 @@
     <div id="accounts"></div>
   </div>
 
-  <script src="script.js?v=9"></script>
+  <script src="script.js?v=10"></script>
 </body>
 </html>
-
-
-
